@@ -19,6 +19,7 @@ extern "C"
 
 #define MTAR_VERSION "0.1.0khmz"
 #define MTAR_NAMEMAX 99
+#define MTAR_SIZEMAX 0xFFFFFFFFUL
 
 enum {
   MTAR_ESUCCESS     =  0,
@@ -30,7 +31,8 @@ enum {
   MTAR_EBADCHKSUM   = -6,
   MTAR_ENULLRECORD  = -7,
   MTAR_ENOTFOUND    = -8,
-  MTAR_ENAMELONG    = -9
+  MTAR_ENAMELONG    = -9,
+  MTAR_ETOOLARGE    = -10
 };
 
 enum {

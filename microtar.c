@@ -84,7 +84,7 @@ static int write_null_bytes(mtar_t *tar, size_t n) {
 }
 
 static int raw_to_header(mtar_header_t *h, const mtar_raw_header_t *rh) {
-  unsigned chksum1, chksum2;
+  unsigned chksum1, chksum2, size;
 
   /* If the checksum starts with a null byte we assume the record is NULL */
   if (*rh->checksum == '\0') {
@@ -101,7 +101,8 @@ static int raw_to_header(mtar_header_t *h, const mtar_raw_header_t *rh) {
   /* Load raw header into header */
   sscanf(rh->mode, "%o", &h->mode);
   sscanf(rh->owner, "%o", &h->owner);
-  sscanf(rh->size, "%o", &h->size);
+  sscanf(rh->size, "%o", &size);
+  h->size = size;
   sscanf(rh->mtime, "%o", &h->mtime);
   h->type = (unsigned)rh->type;
 
@@ -117,11 +118,15 @@ static int raw_to_header(mtar_header_t *h, const mtar_raw_header_t *rh) {
 static int header_to_raw(mtar_raw_header_t *rh, const mtar_header_t *h) {
   unsigned chksum;
 
+  if (h->size > MTAR_SIZEMAX) {
+    return MTAR_ETOOLARGE;
+  }
+
   /* Load header into raw header */
   memset(rh, 0, sizeof(*rh));
   sprintf(rh->mode, "%o", h->mode);
   sprintf(rh->owner, "%o", h->owner);
-  sprintf(rh->size, "%o", h->size);
+  sprintf(rh->size, "%o", (unsigned)h->size);
   sprintf(rh->mtime, "%o", h->mtime);
   rh->type = (char)(h->type ? h->type : MTAR_TREG);
 
@@ -151,6 +156,7 @@ const char* mtar_strerror(int err) {
     case MTAR_ENULLRECORD  : return "null record";
     case MTAR_ENOTFOUND    : return "file not found";
     case MTAR_ENAMELONG    : return "name too long";
+    case MTAR_ETOOLARGE    : return "file too large";
   }
   return "unknown error";
 }
