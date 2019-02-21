@@ -64,6 +64,7 @@ endif()
 
 include(CheckSymbolExists)
 check_symbol_exists(_fseeki64 "stdio.h" HAVE__FSEEKI64)
+check_symbol_exists(fseeko "stdio.h" HAVE_FSEEKO)
 
 include_directories(.)
 
