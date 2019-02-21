@@ -6,7 +6,6 @@ int main(int argc, char **argv)
 {
     mtar_t tar;
     mtar_header_t h;
-    char *p;
 
     if (argc < 2)
     {
