@@ -358,10 +358,10 @@ int mtar_read_header(mtar_t *tar, mtar_header_t *h) {
 
 int mtar_read_data(mtar_t *tar, void *ptr, size_t size) {
   int err;
+  mtar_header_t h;
   /* If we have no remaining data then this is the first read, we get the size,
    * set the remaining data and seek to the beginning of the data */
   if (tar->remaining_data == 0) {
-    mtar_header_t h;
     /* Read header */
     err = mtar_read_header(tar, &h);
     if (err) {
