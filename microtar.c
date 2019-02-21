@@ -105,11 +105,11 @@ static int raw_to_header(mtar_header_t *h, const mtar_raw_header_t *rh) {
   sscanf(rh->mtime, "%o", &h->mtime);
   h->type = (unsigned)rh->type;
 
-  memcpy(h->name, rh->name, MTAR_NAMEMAX);
-  h->name[MTAR_NAMEMAX] = 0;
+  if (strlen(rh->name) > MTAR_NAMEMAX || strlen(rh->linkname) > MTAR_NAMEMAX)
+    return MTAR_ENAMELONG;
 
-  memcpy(h->linkname, rh->linkname, MTAR_NAMEMAX);
-  h->linkname[MTAR_NAMEMAX] = 0;
+  strcpy(h->name, rh->name);
+  strcpy(h->linkname, rh->linkname);
 
   return MTAR_ESUCCESS;
 }
@@ -125,11 +125,11 @@ static int header_to_raw(mtar_raw_header_t *rh, const mtar_header_t *h) {
   sprintf(rh->mtime, "%o", h->mtime);
   rh->type = (char)(h->type ? h->type : MTAR_TREG);
 
-  memcpy(rh->name, h->name, MTAR_NAMEMAX);
-  rh->name[MTAR_NAMEMAX] = 0;
+  if (strlen(h->name) > MTAR_NAMEMAX || strlen(h->linkname) > MTAR_NAMEMAX)
+    return MTAR_ENAMELONG;
 
-  memcpy(rh->linkname, h->linkname, MTAR_NAMEMAX);
-  rh->linkname[MTAR_NAMEMAX] = 0;
+  strcpy(rh->name, h->name);
+  strcpy(rh->linkname, h->linkname);
 
   /* Calculate and write checksum */
   chksum = checksum(rh);
