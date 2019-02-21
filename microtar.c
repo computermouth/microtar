@@ -203,7 +203,9 @@ int mtar_open(mtar_t *tar, const char *filename, const char *mode) {
 }
 
 int mtar_close(mtar_t *tar) {
-  return tar->close(tar);
+  if (tar->close)
+    return tar->close(tar);
+  return MTAR_ESUCCESS;
 }
 
 int mtar_seek(mtar_t *tar, size_t pos) {
