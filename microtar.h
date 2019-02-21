@@ -19,7 +19,12 @@ extern "C"
 
 #define MTAR_VERSION "0.1.0khmz"
 #define MTAR_NAMEMAX 99
-#define MTAR_SIZEMAX 0xFFFFFFFFUL
+
+#if defined(_WIN64) || defined(__x86_64__) || defined(__ppc64__)
+  #define MTAR_SIZEMAX 0x1FFFFFFFFULL
+#else
+  #define MTAR_SIZEMAX  0x7FFFFFFFUL
+#endif
 
 enum {
   MTAR_ESUCCESS     =  0,

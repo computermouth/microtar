@@ -21,6 +21,7 @@
  * IN THE SOFTWARE.
  */
 
+#define _CRT_SECURE_NO_WARNINGS
 #include <stdio.h>
 #include <stdlib.h>
 #include <stddef.h>
@@ -84,7 +85,11 @@ static int write_null_bytes(mtar_t *tar, size_t n) {
 }
 
 static int raw_to_header(mtar_header_t *h, const mtar_raw_header_t *rh) {
-  unsigned chksum1, chksum2, size;
+  unsigned chksum1, chksum2;
+  long long size;
+
+  if (strlen(rh->name) > MTAR_NAMEMAX || strlen(rh->linkname) > MTAR_NAMEMAX)
+    return MTAR_ENAMELONG;
 
   /* If the checksum starts with a null byte we assume the record is NULL */
   if (*rh->checksum == '\0') {
@@ -93,21 +98,22 @@ static int raw_to_header(mtar_header_t *h, const mtar_raw_header_t *rh) {
 
   /* Build and compare checksum */
   chksum1 = checksum(rh);
-  sscanf(rh->checksum, "%o", &chksum2);
+  sscanf(rh->checksum, "%7o", &chksum2);
   if (chksum1 != chksum2) {
     return MTAR_EBADCHKSUM;
   }
 
   /* Load raw header into header */
-  sscanf(rh->mode, "%o", &h->mode);
-  sscanf(rh->owner, "%o", &h->owner);
-  sscanf(rh->size, "%o", &size);
-  h->size = size;
-  sscanf(rh->mtime, "%o", &h->mtime);
+  sscanf(rh->mode, "%7o", &h->mode);
+  sscanf(rh->owner, "%7o", &h->owner);
+  size = 0;
+  sscanf(rh->size, "%11llo", &size);
+  h->size = (size_t)size;
+  sscanf(rh->mtime, "%11o", &h->mtime);
   h->type = (unsigned)rh->type;
 
-  if (strlen(rh->name) > MTAR_NAMEMAX || strlen(rh->linkname) > MTAR_NAMEMAX)
-    return MTAR_ENAMELONG;
+  if (h->size > MTAR_SIZEMAX)
+    return MTAR_ETOOLARGE;
 
   strcpy(h->name, rh->name);
   strcpy(h->linkname, rh->linkname);
@@ -126,7 +132,7 @@ static int header_to_raw(mtar_raw_header_t *rh, const mtar_header_t *h) {
   memset(rh, 0, sizeof(*rh));
   sprintf(rh->mode, "%o", h->mode);
   sprintf(rh->owner, "%o", h->owner);
-  sprintf(rh->size, "%o", (unsigned)h->size);
+  sprintf(rh->size, "%llo", (unsigned long long)h->size);
   sprintf(rh->mtime, "%o", h->mtime);
   rh->type = (char)(h->type ? h->type : MTAR_TREG);
 
@@ -172,10 +178,10 @@ static int file_read(mtar_t *tar, void *data, size_t size) {
 }
 
 static int file_seek(mtar_t *tar, size_t offset) {
-#if defined(_WIN32) || defined(HAVE__FSEEKI64)
+#if defined(_WIN64) || defined(HAVE__FSEEKI64)
   int res = _fseeki64((FILE *)tar->stream, offset, SEEK_SET);
 #else
-  int res = fseek((FILE *)tar->stream, (long)offset, SEEK_SET);
+  int res = fseek((FILE *)tar->stream, offset, SEEK_SET);
 #endif
   return (res == 0) ? MTAR_ESUCCESS : MTAR_ESEEKFAIL;
 }
