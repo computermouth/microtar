@@ -67,6 +67,7 @@ struct mtar_t {
   size_t pos;
   size_t remaining_data;
   size_t last_header;
+  void *memory;
   size_t memory_pos;
   size_t memory_size;
 };

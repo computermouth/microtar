@@ -421,18 +421,18 @@ static int memory_write(mtar_t *tar, const void *data, size_t size) {
 
   request_size = tar->memory_pos + size;
   if (request_size > tar->memory_size) {
-    tar->stream = realloc(tar->stream, request_size);
-    if (!tar->stream) {
+    tar->memory = realloc(tar->memory, request_size);
+    if (!tar->memory) {
       return MTAR_EWRITEFAIL;
     }
     tar->memory_size = request_size;
   } else {
-    if (!tar->stream) {
+    if (!tar->memory) {
       return MTAR_EWRITEFAIL;
     }
   }
 
-  memory = (char *)tar->stream;
+  memory = (char *)tar->memory;
   memcpy(&memory[tar->memory_pos], data, size);
   tar->memory_pos += size;
 
@@ -445,7 +445,7 @@ static int memory_read(mtar_t *tar, void *data, size_t size) {
   if (!size)
     return MTAR_ESUCCESS;
 
-  memory = (char *)tar->stream;
+  memory = (char *)tar->memory;
   if (tar->memory_pos + size > tar->memory_size)
     return MTAR_EREADFAIL;
 
@@ -464,8 +464,8 @@ static int memory_seek(mtar_t *tar, size_t offset) {
 }
 
 static int memory_close(mtar_t *tar) {
-  free(tar->stream);
-  tar->stream = NULL;
+  free(tar->memory);
+  tar->memory = NULL;
   return MTAR_ESUCCESS;
 }
 
@@ -486,7 +486,8 @@ int mtar_open_memory(mtar_t *tar, void *data, size_t size) {
   tar->read = memory_read;
   tar->seek = memory_seek;
   tar->close = memory_close;
-  tar->stream = memory;
+  tar->memory = memory;
+  tar->memory_pos = 0;
   tar->memory_size = size;
 
   /* Return ok */

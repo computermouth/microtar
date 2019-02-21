@@ -54,7 +54,7 @@ int main(int argc, char **argv)
         return 5;
     }
 
-    if (memcmp(buf, tar.stream, size) != 0)
+    if (memcmp(buf, tar.memory, size) != 0)
     {
         printf("data differs\n");
         return 6;
