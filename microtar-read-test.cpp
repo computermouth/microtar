@@ -20,9 +20,34 @@ int main(int argc, char **argv)
         return 2;
     }
 
-    while ((mtar_read_header(&tar, &h)) != MTAR_ENULLRECORD)
+    for (;;)
     {
+        if (int error = mtar_read_header(&tar, &h))
+        {
+            if (error == MTAR_ENULLRECORD)
+            {
+                break;
+            }
+            printf("error: %d\n", error);
+            return 5;
+        }
         printf("%s (%d bytes)\n", h.name, (int)h.size);
+
+        char data[256];
+        if (h.size + 1 > sizeof(data))
+        {
+            printf("error: too large\n");
+            return 6;
+        }
+
+        if (int error = mtar_read_data(&tar, data, h.size))
+        {
+            printf("error: %d\n", error);
+            return 4;
+        }
+        data[h.size] = 0;
+
+        puts(data);
         mtar_next(&tar);
     }
 
@@ -32,5 +57,6 @@ int main(int argc, char **argv)
         return 3;
     }
 
+    fflush(stdout);
     return 0;
 }
