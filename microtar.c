@@ -178,7 +178,7 @@ static int file_read(mtar_t *tar, void *data, size_t size) {
 }
 
 static int file_seek(mtar_t *tar, size_t offset) {
-#if defined(_WIN64) || defined(HAVE__FSEEKI64)
+#if defined(HAVE__FSEEKI64) && (defined(_WIN64) || defined(__x86_64__) || defined(__ppc64__))
   int res = _fseeki64((FILE *)tar->stream, offset, SEEK_SET);
 #elif defined(HAVE_FSEEKO) && (defined(_WIN64) || defined(__x86_64__) || defined(__ppc64__))
   int res = fseeko((FILE *)tar->stream, offset, SEEK_SET);
