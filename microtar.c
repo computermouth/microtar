@@ -40,15 +40,13 @@ typedef struct {
   char _padding[255];
 } mtar_raw_header_t;
 
-
-static unsigned round_up(unsigned n, unsigned incr) {
+static size_t round_up(size_t n, size_t incr) {
   return n + (incr - n % incr) % incr;
 }
 
-
 static unsigned checksum(const mtar_raw_header_t* rh) {
   unsigned i;
-  unsigned char *p = (unsigned char*) rh;
+  const unsigned char *p = (const unsigned char*) rh;
   unsigned res = 256;
   for (i = 0; i < offsetof(mtar_raw_header_t, checksum); i++) {
     res += p[i];
@@ -59,23 +57,21 @@ static unsigned checksum(const mtar_raw_header_t* rh) {
   return res;
 }
 
-
-static int tread(mtar_t *tar, void *data, unsigned size) {
+static int tread(mtar_t *tar, void *data, size_t size) {
   int err = tar->read(tar, data, size);
   tar->pos += size;
   return err;
 }
 
-
-static int twrite(mtar_t *tar, const void *data, unsigned size) {
+static int twrite(mtar_t *tar, const void *data, size_t size) {
   int err = tar->write(tar, data, size);
   tar->pos += size;
   return err;
 }
 
-
-static int write_null_bytes(mtar_t *tar, int n) {
-  int i, err;
+static int write_null_bytes(mtar_t *tar, size_t n) {
+  size_t i;
+  int err;
   char nul = '\0';
   for (i = 0; i < n; i++) {
     err = twrite(tar, &nul, 1);
@@ -85,7 +81,6 @@ static int write_null_bytes(mtar_t *tar, int n) {
   }
   return MTAR_ESUCCESS;
 }
-
 
 static int raw_to_header(mtar_header_t *h, const mtar_raw_header_t *rh) {
   unsigned chksum1, chksum2;
@@ -107,13 +102,12 @@ static int raw_to_header(mtar_header_t *h, const mtar_raw_header_t *rh) {
   sscanf(rh->owner, "%o", &h->owner);
   sscanf(rh->size, "%o", &h->size);
   sscanf(rh->mtime, "%o", &h->mtime);
-  h->type = rh->type;
+  h->type = (unsigned)rh->type;
   strcpy(h->name, rh->name);
   strcpy(h->linkname, rh->linkname);
 
   return MTAR_ESUCCESS;
 }
-
 
 static int header_to_raw(mtar_raw_header_t *rh, const mtar_header_t *h) {
   unsigned chksum;
@@ -124,7 +118,7 @@ static int header_to_raw(mtar_raw_header_t *rh, const mtar_header_t *h) {
   sprintf(rh->owner, "%o", h->owner);
   sprintf(rh->size, "%o", h->size);
   sprintf(rh->mtime, "%o", h->mtime);
-  rh->type = h->type ? h->type : MTAR_TREG;
+  rh->type = (char)(h->type ? h->type : MTAR_TREG);
   strcpy(rh->name, h->name);
   strcpy(rh->linkname, h->linkname);
 
@@ -135,7 +129,6 @@ static int header_to_raw(mtar_raw_header_t *rh, const mtar_header_t *h) {
 
   return MTAR_ESUCCESS;
 }
-
 
 const char* mtar_strerror(int err) {
   switch (err) {
@@ -152,27 +145,29 @@ const char* mtar_strerror(int err) {
   return "unknown error";
 }
 
-
-static int file_write(mtar_t *tar, const void *data, unsigned size) {
-  unsigned res = fwrite(data, 1, size, tar->stream);
+static int file_write(mtar_t *tar, const void *data, size_t size) {
+  size_t res = fwrite(data, 1, size, (FILE *)tar->stream);
   return (res == size) ? MTAR_ESUCCESS : MTAR_EWRITEFAIL;
 }
 
-static int file_read(mtar_t *tar, void *data, unsigned size) {
-  unsigned res = fread(data, 1, size, tar->stream);
+static int file_read(mtar_t *tar, void *data, size_t size) {
+  size_t res = fread(data, 1, size, (FILE *)tar->stream);
   return (res == size) ? MTAR_ESUCCESS : MTAR_EREADFAIL;
 }
 
-static int file_seek(mtar_t *tar, unsigned offset) {
-  int res = fseek(tar->stream, offset, SEEK_SET);
+static int file_seek(mtar_t *tar, size_t offset) {
+#if defined(_WIN32) || defined(HAVE__FSEEKI64)
+  int res = _fseeki64((FILE *)tar->stream, offset, SEEK_SET);
+#else
+  int res = fseek((FILE *)tar->stream, (long)offset, SEEK_SET);
+#endif
   return (res == 0) ? MTAR_ESUCCESS : MTAR_ESEEKFAIL;
 }
 
 static int file_close(mtar_t *tar) {
-  fclose(tar->stream);
+  fclose((FILE *)tar->stream);
   return MTAR_ESUCCESS;
 }
-
 
 int mtar_open(mtar_t *tar, const char *filename, const char *mode) {
   int err;
@@ -190,7 +185,7 @@ int mtar_open(mtar_t *tar, const char *filename, const char *mode) {
   if ( strchr(mode, 'w') ) mode = "wb";
   if ( strchr(mode, 'a') ) mode = "ab";
   /* Open file */
-  tar->stream = fopen(filename, mode);
+  tar->stream = (void *)fopen(filename, mode);
   if (!tar->stream) {
     return MTAR_EOPENFAIL;
   }
@@ -207,18 +202,15 @@ int mtar_open(mtar_t *tar, const char *filename, const char *mode) {
   return MTAR_ESUCCESS;
 }
 
-
 int mtar_close(mtar_t *tar) {
   return tar->close(tar);
 }
 
-
-int mtar_seek(mtar_t *tar, unsigned pos) {
+int mtar_seek(mtar_t *tar, size_t pos) {
   int err = tar->seek(tar, pos);
   tar->pos = pos;
   return err;
 }
-
 
 int mtar_rewind(mtar_t *tar) {
   tar->remaining_data = 0;
@@ -226,9 +218,9 @@ int mtar_rewind(mtar_t *tar) {
   return mtar_seek(tar, 0);
 }
 
-
 int mtar_next(mtar_t *tar) {
-  int err, n;
+  int err;
+  size_t n;
   mtar_header_t h;
   /* Load header */
   err = mtar_read_header(tar, &h);
@@ -239,7 +231,6 @@ int mtar_next(mtar_t *tar) {
   n = round_up(h.size, 512) + sizeof(mtar_raw_header_t);
   return mtar_seek(tar, tar->pos + n);
 }
-
 
 int mtar_find(mtar_t *tar, const char *name, mtar_header_t *h) {
   int err;
@@ -266,7 +257,6 @@ int mtar_find(mtar_t *tar, const char *name, mtar_header_t *h) {
   return err;
 }
 
-
 int mtar_read_header(mtar_t *tar, mtar_header_t *h) {
   int err;
   mtar_raw_header_t rh;
@@ -286,8 +276,7 @@ int mtar_read_header(mtar_t *tar, mtar_header_t *h) {
   return raw_to_header(h, &rh);
 }
 
-
-int mtar_read_data(mtar_t *tar, void *ptr, unsigned size) {
+int mtar_read_data(mtar_t *tar, void *ptr, size_t size) {
   int err;
   /* If we have no remaining data then this is the first read, we get the size,
    * set the remaining data and seek to the beginning of the data */
@@ -319,7 +308,6 @@ int mtar_read_data(mtar_t *tar, void *ptr, unsigned size) {
   return MTAR_ESUCCESS;
 }
 
-
 int mtar_write_header(mtar_t *tar, const mtar_header_t *h) {
   mtar_raw_header_t rh;
   /* Build raw header and write */
@@ -328,8 +316,7 @@ int mtar_write_header(mtar_t *tar, const mtar_header_t *h) {
   return twrite(tar, &rh, sizeof(rh));
 }
 
-
-int mtar_write_file_header(mtar_t *tar, const char *name, unsigned size) {
+int mtar_write_file_header(mtar_t *tar, const char *name, size_t size) {
   mtar_header_t h;
   /* Build header */
   memset(&h, 0, sizeof(h));
@@ -340,7 +327,6 @@ int mtar_write_file_header(mtar_t *tar, const char *name, unsigned size) {
   /* Write header */
   return mtar_write_header(tar, &h);
 }
-
 
 int mtar_write_dir_header(mtar_t *tar, const char *name) {
   mtar_header_t h;
@@ -353,8 +339,7 @@ int mtar_write_dir_header(mtar_t *tar, const char *name) {
   return mtar_write_header(tar, &h);
 }
 
-
-int mtar_write_data(mtar_t *tar, const void *data, unsigned size) {
+int mtar_write_data(mtar_t *tar, const void *data, size_t size) {
   int err;
   /* Write data */
   err = twrite(tar, data, size);
@@ -368,7 +353,6 @@ int mtar_write_data(mtar_t *tar, const void *data, unsigned size) {
   }
   return MTAR_ESUCCESS;
 }
-
 
 int mtar_finalize(mtar_t *tar) {
   /* Write two NULL records */
