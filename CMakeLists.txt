@@ -62,6 +62,9 @@ endif()
 
 ##############################################################################
 
+include(CheckSymbolExists)
+check_symbol_exists(_fseeki64 "stdio.h" HAVE__FSEEKI64)
+
 include_directories(.)
 
 # libmicrotar.a
