@@ -410,3 +410,84 @@ int mtar_finalize(mtar_t *tar) {
   /* Write two NULL records */
   return write_null_bytes(tar, sizeof(mtar_raw_header_t) * 2);
 }
+
+static int memory_write(mtar_t *tar, const void *data, size_t size) {
+  char *memory;
+  size_t request_size;
+
+  if (!size)
+    return MTAR_ESUCCESS;
+
+  request_size = tar->memory_pos + size;
+  if (request_size > tar->memory_size) {
+    tar->stream = realloc(tar->stream, request_size);
+    if (!tar->stream) {
+      return MTAR_EWRITEFAIL;
+    }
+    tar->memory_size = request_size;
+  } else {
+    if (!tar->stream) {
+      return MTAR_EWRITEFAIL;
+    }
+  }
+
+  memory = (char *)tar->stream;
+  memcpy(&memory[tar->memory_pos], data, size);
+  tar->memory_pos += size;
+
+  return MTAR_ESUCCESS;
+}
+
+static int memory_read(mtar_t *tar, void *data, size_t size) {
+  char *memory;
+
+  if (!size)
+    return MTAR_ESUCCESS;
+
+  memory = (char *)tar->stream;
+  if (tar->memory_pos + size > tar->memory_size)
+    return MTAR_EREADFAIL;
+
+  memcpy(data, &memory[tar->memory_pos], size);
+  tar->memory_pos += size;
+
+  return MTAR_ESUCCESS;
+}
+
+static int memory_seek(mtar_t *tar, size_t offset) {
+  if (offset > tar->memory_size)
+    return MTAR_ESEEKFAIL;
+
+  tar->memory_pos = offset;
+  return MTAR_ESUCCESS;
+}
+
+static int memory_close(mtar_t *tar) {
+  free(tar->stream);
+  tar->stream = NULL;
+  return MTAR_ESUCCESS;
+}
+
+int mtar_open_memory(mtar_t *tar, void *data, size_t size) {
+  void *memory = NULL;
+
+  if (data && size) {
+    memory = malloc(size);
+    if (!memory)
+      return MTAR_EFAILURE;
+
+    memcpy(memory, data, size);
+  }
+
+  /* Init tar struct and functions */
+  memset(tar, 0, sizeof(*tar));
+  tar->write = memory_write;
+  tar->read = memory_read;
+  tar->seek = memory_seek;
+  tar->close = memory_close;
+  tar->stream = memory;
+  tar->memory_size = size;
+
+  /* Return ok */
+  return MTAR_ESUCCESS;
+}

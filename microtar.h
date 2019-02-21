@@ -67,6 +67,8 @@ struct mtar_t {
   size_t pos;
   size_t remaining_data;
   size_t last_header;
+  size_t memory_pos;
+  size_t memory_size;
 };
 
 const char* mtar_strerror(int err);
@@ -76,6 +78,7 @@ int mtar_open(mtar_t *tar, const char *filename, const char *mode);
   int mtar_open_w(mtar_t *tar, const wchar_t *filename, const wchar_t *mode);
 #endif
 int mtar_open_fp(mtar_t *tar, void *fp);
+int mtar_open_memory(mtar_t *tar, void *data, size_t size);
 int mtar_close(mtar_t *tar);
 
 int mtar_seek(mtar_t *tar, size_t pos);

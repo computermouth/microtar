@@ -14,7 +14,24 @@ int main(int argc, char **argv)
         return 1;
     }
 
-    if (int error = mtar_open(&tar, argv[1], "w"))
+    FILE *fp = fopen(argv[1], "rb");
+    if (!fp)
+    {
+        printf("error: unable to open\n");
+        return 6;
+    }
+
+    static char buf[4000];
+    size_t size = fread(buf, 1, 4000, fp);
+    if (!size)
+    {
+        printf("error: unable to read\n");
+        fclose(fp);
+        return 7;
+    }
+    fclose(fp);
+
+    if (int error = mtar_open_memory(&tar, NULL, 0))
     {
         printf("error: %d\n", error);
         return 2;
@@ -29,6 +46,18 @@ int main(int argc, char **argv)
     {
         printf("error: %d\n", error);
         return 3;
+    }
+
+    if (size != tar.memory_size)
+    {
+        printf("size differs\n");
+        return 5;
+    }
+
+    if (memcmp(buf, tar.stream, size) != 0)
+    {
+        printf("data differs\n");
+        return 6;
     }
 
     if (int error = mtar_close(&tar))

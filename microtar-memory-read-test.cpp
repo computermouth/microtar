@@ -6,7 +6,6 @@ int main(int argc, char **argv)
 {
     mtar_t tar;
     mtar_header_t h;
-    char *p;
 
     if (argc < 2)
     {
@@ -14,7 +13,24 @@ int main(int argc, char **argv)
         return 1;
     }
 
-    if (int error = mtar_open(&tar, argv[1], "r"))
+    FILE *fp = fopen(argv[1], "rb");
+    if (!fp)
+    {
+        printf("error: unable to open\n");
+        return 6;
+    }
+
+    static char buf[4000];
+    size_t size = fread(buf, 1, 4000, fp);
+    if (!size)
+    {
+        printf("error: unable to read\n");
+        fclose(fp);
+        return 7;
+    }
+    fclose(fp);
+
+    if (int error = mtar_open_memory(&tar, buf, size))
     {
         printf("error: %d\n", error);
         return 2;

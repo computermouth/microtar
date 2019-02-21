@@ -73,11 +73,23 @@ target_link_libraries(microtar-read-test microtar)
 add_executable(microtar-write-test microtar-write-test.cpp)
 target_link_libraries(microtar-write-test microtar)
 
+# microtar-memory-read-test.exe
+add_executable(microtar-memory-read-test microtar-memory-read-test.cpp)
+target_link_libraries(microtar-memory-read-test microtar)
+
+# microtar-memory-write-test.exe
+add_executable(microtar-memory-write-test microtar-memory-write-test.cpp)
+target_link_libraries(microtar-memory-write-test microtar)
+
 # tests
 add_test(NAME microtar-read-test
          COMMAND $<TARGET_FILE:microtar-read-test> ${PROJECT_SOURCE_DIR}/test-data/test-file.tar)
 add_test(NAME microtar-write-test
          COMMAND $<TARGET_FILE:microtar-write-test> ${PROJECT_BINARY_DIR}/written.tar
          WORKING_DIRECTORY ${PROJECT_BINARY_DIR})
+add_test(NAME microtar-memory-read-test
+         COMMAND $<TARGET_FILE:microtar-memory-read-test> ${PROJECT_SOURCE_DIR}/test-data/test-file.tar)
+add_test(NAME microtar-memory-write-test
+         COMMAND $<TARGET_FILE:microtar-memory-write-test> ${PROJECT_SOURCE_DIR}/test-data/test-file-2.tar)
 
 ##############################################################################
