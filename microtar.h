@@ -72,6 +72,9 @@ struct mtar_t {
 const char* mtar_strerror(int err);
 
 int mtar_open(mtar_t *tar, const char *filename, const char *mode);
+#ifdef _WIN32
+  int mtar_open_w(mtar_t *tar, const wchar_t *filename, const wchar_t *mode);
+#endif
 int mtar_open_fp(mtar_t *tar, void *fp);
 int mtar_close(mtar_t *tar);
 
@@ -90,6 +93,12 @@ int mtar_finalize(mtar_t *tar);
 
 #ifdef __cplusplus
 }
+#endif
+
+#ifdef UNICODE
+    #define mtar_open_t mtar_open_w
+#else
+    #define mtar_open_t mtar_open
 #endif
 
 #endif

@@ -216,6 +216,42 @@ int mtar_open(mtar_t *tar, const char *filename, const char *mode) {
   return MTAR_ESUCCESS;
 }
 
+#ifdef _WIN32
+  int mtar_open_w(mtar_t *tar, const wchar_t *filename, const wchar_t *mode) {
+    FILE *fp;
+    int err;
+    mtar_header_t h;
+
+    /* Assure mode is always binary */
+    if ( strchr(mode, L'r') ) mode = L"rb";
+    if ( strchr(mode, L'w') ) mode = L"wb";
+    if ( strchr(mode, L'a') ) mode = L"ab";
+
+    /* Open file */
+    fp = _wfopen(filename, mode);
+    if (!fp) {
+      return MTAR_EOPENFAIL;
+    }
+
+    err = mtar_open_fp(tar, fp);
+    if (err) {
+      return err;
+    }
+
+    /* Read first header to check it is valid if mode is `r` */
+    if (*mode == L'r') {
+      err = mtar_read_header(tar, &h);
+      if (err != MTAR_ESUCCESS) {
+        mtar_close(tar);
+        return err;
+      }
+    }
+
+    /* Return ok */
+    return MTAR_ESUCCESS;
+  }
+#endif
+
 int mtar_close(mtar_t *tar) {
   if (tar->close)
     return tar->close(tar);
