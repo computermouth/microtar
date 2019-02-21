@@ -87,7 +87,7 @@ The following callbacks should be set for reading an archive from a stream:
 Name    | Arguments                              | Description
 --------|----------------------------------------|---------------------------
 `read`  | `mtar_t *tar, void *data, size_t size` | Read data from the stream
-`seek`  | `mtar_t *tar, unsigned pos`            | Set the position indicator
+`seek`  | `mtar_t *tar, size_t pos`              | Set the position indicator
 `close` | `mtar_t *tar`                          | Close the stream
 
 #### Writing
