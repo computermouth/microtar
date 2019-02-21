@@ -1,6 +1,6 @@
 /**
  * Copyright (c) 2017 rxi
- * Copyright (c) 2019 katahiromz
+ * Copyright (c) 2019 Katayama Hirofumi MZ <katayama.hirofumi.mz@gmail.com>
  *
  * This library is free software; you can redistribute it and/or modify it
  * under the terms of the MIT license. See `microtar.c` for details.
