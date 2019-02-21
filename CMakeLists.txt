@@ -96,13 +96,13 @@ target_link_libraries(microtar-memory-write-test microtar)
 
 # tests
 add_test(NAME microtar-read-test
-         COMMAND $<TARGET_FILE:microtar-read-test> ${PROJECT_SOURCE_DIR}/test-data/test-file.tar)
+         COMMAND $<TARGET_FILE:microtar-read-test> ${PROJECT_SOURCE_DIR}/tests/testdata/test-file.tar)
 add_test(NAME microtar-write-test
          COMMAND $<TARGET_FILE:microtar-write-test> ${PROJECT_BINARY_DIR}/written.tar
          WORKING_DIRECTORY ${PROJECT_BINARY_DIR})
 add_test(NAME microtar-memory-read-test
-         COMMAND $<TARGET_FILE:microtar-memory-read-test> ${PROJECT_SOURCE_DIR}/test-data/test-file.tar)
+         COMMAND $<TARGET_FILE:microtar-memory-read-test> ${PROJECT_SOURCE_DIR}/tests/testdata/test-file.tar)
 add_test(NAME microtar-memory-write-test
-         COMMAND $<TARGET_FILE:microtar-memory-write-test> ${PROJECT_SOURCE_DIR}/test-data/test-file-2.tar)
+         COMMAND $<TARGET_FILE:microtar-memory-write-test> ${PROJECT_SOURCE_DIR}/tests/testdata/test-file-2.tar)
 
 ##############################################################################
