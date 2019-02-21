@@ -62,23 +62,25 @@ endif()
 
 ##############################################################################
 
+include_directories(.)
+
 # libmicrotar.a
 add_library(microtar STATIC microtar.c)
 
 # microtar-read-test.exe
-add_executable(microtar-read-test microtar-read-test.cpp)
+add_executable(microtar-read-test tests/microtar-read-test.cpp)
 target_link_libraries(microtar-read-test microtar)
 
 # microtar-write-test.exe
-add_executable(microtar-write-test microtar-write-test.cpp)
+add_executable(microtar-write-test tests/microtar-write-test.cpp)
 target_link_libraries(microtar-write-test microtar)
 
 # microtar-memory-read-test.exe
-add_executable(microtar-memory-read-test microtar-memory-read-test.cpp)
+add_executable(microtar-memory-read-test tests/microtar-memory-read-test.cpp)
 target_link_libraries(microtar-memory-read-test microtar)
 
 # microtar-memory-write-test.exe
-add_executable(microtar-memory-write-test microtar-memory-write-test.cpp)
+add_executable(microtar-memory-write-test tests/microtar-memory-write-test.cpp)
 target_link_libraries(microtar-memory-write-test microtar)
 
 # tests
