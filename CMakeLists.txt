@@ -66,6 +66,13 @@ include(CheckSymbolExists)
 check_symbol_exists(_fseeki64 "stdio.h" HAVE__FSEEKI64)
 check_symbol_exists(fseeko "stdio.h" HAVE_FSEEKO)
 
+if (HAVE__FSEEKI64)
+    add_definitions(-DHAVE__FSEEKI64)
+endif()
+if (HAVE_FSEEKO)
+    add_definitions(-DHAVE_FSEEKO)
+endif()
+
 include_directories(.)
 
 # libmicrotar.a
