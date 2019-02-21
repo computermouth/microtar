@@ -223,9 +223,9 @@ int mtar_open(mtar_t *tar, const char *filename, const char *mode) {
     mtar_header_t h;
 
     /* Assure mode is always binary */
-    if ( strchr(mode, L'r') ) mode = L"rb";
-    if ( strchr(mode, L'w') ) mode = L"wb";
-    if ( strchr(mode, L'a') ) mode = L"ab";
+    if ( wcschr(mode, L'r') ) mode = L"rb";
+    if ( wcschr(mode, L'w') ) mode = L"wb";
+    if ( wcschr(mode, L'a') ) mode = L"ab";
 
     /* Open file */
     fp = _wfopen(filename, mode);
