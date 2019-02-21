@@ -421,10 +421,11 @@ static int memory_write(mtar_t *tar, const void *data, size_t size) {
 
   request_size = tar->memory_pos + size;
   if (request_size > tar->memory_size) {
-    tar->memory = realloc(tar->memory, request_size);
-    if (!tar->memory) {
+    memory = (char *)realloc(tar->memory, request_size);
+    if (!memory) {
       return MTAR_EWRITEFAIL;
     }
+    tar->memory = memory;
     tar->memory_size = request_size;
   } else {
     if (!tar->memory) {
