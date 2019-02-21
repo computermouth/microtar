@@ -169,26 +169,40 @@ static int file_close(mtar_t *tar) {
   return MTAR_ESUCCESS;
 }
 
-int mtar_open(mtar_t *tar, const char *filename, const char *mode) {
-  int err;
-  mtar_header_t h;
-
+int mtar_open_fp(mtar_t *tar, void *fp) {
   /* Init tar struct and functions */
   memset(tar, 0, sizeof(*tar));
   tar->write = file_write;
   tar->read = file_read;
   tar->seek = file_seek;
   tar->close = file_close;
+  tar->stream = fp;
+
+  /* Return ok */
+  return MTAR_ESUCCESS;
+}
+
+int mtar_open(mtar_t *tar, const char *filename, const char *mode) {
+  FILE *fp;
+  int err;
+  mtar_header_t h;
 
   /* Assure mode is always binary */
   if ( strchr(mode, 'r') ) mode = "rb";
   if ( strchr(mode, 'w') ) mode = "wb";
   if ( strchr(mode, 'a') ) mode = "ab";
+
   /* Open file */
-  tar->stream = (void *)fopen(filename, mode);
-  if (!tar->stream) {
+  fp = fopen(filename, mode);
+  if (!fp) {
     return MTAR_EOPENFAIL;
   }
+
+  err = mtar_open_fp(tar, fp);
+  if (err) {
+    return err;
+  }
+
   /* Read first header to check it is valid if mode is `r` */
   if (*mode == 'r') {
     err = mtar_read_header(tar, &h);
