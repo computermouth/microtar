@@ -80,20 +80,20 @@ struct was initialized manually.
 #### Reading
 The following callbacks should be set for reading an archive from a stream:
 
-Name    | Arguments                                | Description
---------|------------------------------------------|---------------------------
-`read`  | `mtar_t *tar, void *data, unsigned size` | Read data from the stream
-`seek`  | `mtar_t *tar, unsigned pos`              | Set the position indicator
-`close` | `mtar_t *tar`                            | Close the stream
+Name    | Arguments                              | Description
+--------|----------------------------------------|---------------------------
+`read`  | `mtar_t *tar, void *data, size_t size` | Read data from the stream
+`seek`  | `mtar_t *tar, unsigned pos`            | Set the position indicator
+`close` | `mtar_t *tar`                          | Close the stream
 
 #### Writing
 The following callbacks should be set for writing an archive to a stream:
 
-Name    | Arguments                                      | Description
---------|------------------------------------------------|---------------------
-`write` | `mtar_t *tar, const void *data, unsigned size` | Write data to the stream
+Name    | Arguments                                    | Description
+--------|----------------------------------------------|---------------------
+`write` | `mtar_t *tar, const void *data, size_t size` | Write data to the stream
 
 
 ## License
 This library is free software; you can redistribute it and/or modify it under
-the terms of the MIT license. See [LICENSE](LICENSE) for details.
+the terms of the MIT license. See [LICENSE.txt](LICENSE.txt) for details.
