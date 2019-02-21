@@ -474,12 +474,12 @@ static int memory_write(mtar_t *tar, const void *data, size_t size) {
     tar->memory = memory;
     tar->memory_size = request_size;
   } else {
-    if (!tar->memory) {
+    memory = (char *)tar->memory;
+    if (!memory) {
       return MTAR_EWRITEFAIL;
     }
   }
 
-  memory = (char *)tar->memory;
   memcpy(&memory[tar->memory_pos], data, size);
   tar->memory_pos += size;
 
