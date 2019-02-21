@@ -1,5 +1,6 @@
 /**
  * Copyright (c) 2017 rxi
+ * Copyright (c) 2019 katahiromz
  *
  * This library is free software; you can redistribute it and/or modify it
  * under the terms of the MIT license. See `microtar.c` for details.
@@ -16,7 +17,7 @@ extern "C"
 #include <stdio.h>
 #include <stdlib.h>
 
-#define MTAR_VERSION "0.1.0"
+#define MTAR_VERSION "0.1.0khmz"
 
 enum {
   MTAR_ESUCCESS     =  0,
@@ -50,7 +51,6 @@ typedef struct {
   char linkname[100];
 } mtar_header_t;
 
-
 typedef struct mtar_t mtar_t;
 
 struct mtar_t {
@@ -63,7 +63,6 @@ struct mtar_t {
   unsigned remaining_data;
   unsigned last_header;
 };
-
 
 const char* mtar_strerror(int err);
 
