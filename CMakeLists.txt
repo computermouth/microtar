@@ -66,11 +66,17 @@ include(CheckSymbolExists)
 check_symbol_exists(_fseeki64 "stdio.h" HAVE__FSEEKI64)
 check_symbol_exists(fseeko "stdio.h" HAVE_FSEEKO)
 
+include(CheckTypeSize)
+check_type_size("long long" HAVE_LONG_LONG)
+
 if (HAVE__FSEEKI64)
     add_definitions(-DHAVE__FSEEKI64)
 endif()
 if (HAVE_FSEEKO)
     add_definitions(-DHAVE_FSEEKO)
+endif()
+if (HAVE_LONG_LONG)
+    add_definitions(-DHAVE_LONG_LONG)
 endif()
 
 include_directories(.)

@@ -86,7 +86,11 @@ static int write_null_bytes(mtar_t *tar, size_t n) {
 
 static int raw_to_header(mtar_header_t *h, const mtar_raw_header_t *rh) {
   unsigned chksum1, chksum2;
+#ifdef HAVE_LONG_LONG
   long long size;
+#else
+  long size;
+#endif
 
   if (strlen(rh->name) > MTAR_NAMEMAX || strlen(rh->linkname) > MTAR_NAMEMAX)
     return MTAR_ENAMELONG;
@@ -107,8 +111,13 @@ static int raw_to_header(mtar_header_t *h, const mtar_raw_header_t *rh) {
   sscanf(rh->mode, "%7o", &h->mode);
   sscanf(rh->owner, "%7o", &h->owner);
   size = 0;
+#ifdef HAVE_LONG_LONG
   sscanf(rh->size, "%11llo", &size);
   h->size = (size_t)size;
+#else
+  sscanf(rh->size, "%11lo", &size);
+  h->size = (size_t)size;
+#endif
   sscanf(rh->mtime, "%11o", &h->mtime);
   h->type = (unsigned)rh->type;
 
@@ -132,7 +141,11 @@ static int header_to_raw(mtar_raw_header_t *rh, const mtar_header_t *h) {
   memset(rh, 0, sizeof(*rh));
   sprintf(rh->mode, "%o", h->mode);
   sprintf(rh->owner, "%o", h->owner);
+#ifdef HAVE_LONG_LONG
   sprintf(rh->size, "%llo", (unsigned long long)h->size);
+#else
+  sprintf(rh->size, "%lo", (unsigned long)h->size);
+#endif
   sprintf(rh->mtime, "%o", h->mtime);
   rh->type = (char)(h->type ? h->type : MTAR_TREG);
 
