@@ -3,7 +3,7 @@
 [![Travis Build Status](https://travis-ci.org/katahiromz/microtar.svg?branch=master)](https://travis-ci.org/katahiromz/microtar)
 [![AppVeyor Build status](https://ci.appveyor.com/api/projects/status/vf38f6l6pkj5e1kn?svg=true)](https://ci.appveyor.com/project/katahiromz/microtar)
 
-A lightweight tar library written in ANSI C
+A lightweight tar library written in C.
 
 
 ## Basic Usage
