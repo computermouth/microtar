@@ -18,6 +18,7 @@ extern "C"
 #include <stdlib.h>
 
 #define MTAR_VERSION "0.1.0khmz"
+#define MTAR_NAMEMAX 99
 
 enum {
   MTAR_ESUCCESS     =  0,
@@ -28,7 +29,8 @@ enum {
   MTAR_ESEEKFAIL    = -5,
   MTAR_EBADCHKSUM   = -6,
   MTAR_ENULLRECORD  = -7,
-  MTAR_ENOTFOUND    = -8
+  MTAR_ENOTFOUND    = -8,
+  MTAR_ENAMELONG    = -9
 };
 
 enum {
@@ -47,8 +49,8 @@ typedef struct {
   size_t size;
   unsigned mtime;
   unsigned type;
-  char name[100];
-  char linkname[100];
+  char name[MTAR_NAMEMAX + 1];
+  char linkname[MTAR_NAMEMAX + 1];
 } mtar_header_t;
 
 typedef struct mtar_t mtar_t;

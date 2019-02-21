@@ -29,7 +29,7 @@
 #include "microtar.h"
 
 typedef struct {
-  char name[100];
+  char name[MTAR_NAMEMAX + 1];
   char mode[8];
   char owner[8];
   char group[8];
@@ -37,7 +37,7 @@ typedef struct {
   char mtime[12];
   char checksum[8];
   char type;
-  char linkname[100];
+  char linkname[MTAR_NAMEMAX + 1];
   char _padding[255];
 } mtar_raw_header_t;
 
@@ -104,8 +104,12 @@ static int raw_to_header(mtar_header_t *h, const mtar_raw_header_t *rh) {
   sscanf(rh->size, "%o", &h->size);
   sscanf(rh->mtime, "%o", &h->mtime);
   h->type = (unsigned)rh->type;
-  strcpy(h->name, rh->name);
-  strcpy(h->linkname, rh->linkname);
+
+  memcpy(h->name, rh->name, MTAR_NAMEMAX);
+  h->name[MTAR_NAMEMAX] = 0;
+
+  memcpy(h->linkname, rh->linkname, MTAR_NAMEMAX);
+  h->linkname[MTAR_NAMEMAX] = 0;
 
   return MTAR_ESUCCESS;
 }
@@ -120,8 +124,12 @@ static int header_to_raw(mtar_raw_header_t *rh, const mtar_header_t *h) {
   sprintf(rh->size, "%o", h->size);
   sprintf(rh->mtime, "%o", h->mtime);
   rh->type = (char)(h->type ? h->type : MTAR_TREG);
-  strcpy(rh->name, h->name);
-  strcpy(rh->linkname, h->linkname);
+
+  memcpy(rh->name, h->name, MTAR_NAMEMAX);
+  rh->name[MTAR_NAMEMAX] = 0;
+
+  memcpy(rh->linkname, h->linkname, MTAR_NAMEMAX);
+  rh->linkname[MTAR_NAMEMAX] = 0;
 
   /* Calculate and write checksum */
   chksum = checksum(rh);
@@ -142,6 +150,7 @@ const char* mtar_strerror(int err) {
     case MTAR_EBADCHKSUM   : return "bad checksum";
     case MTAR_ENULLRECORD  : return "null record";
     case MTAR_ENOTFOUND    : return "file not found";
+    case MTAR_ENAMELONG    : return "name too long";
   }
   return "unknown error";
 }
@@ -288,6 +297,10 @@ int mtar_next(mtar_t *tar) {
 int mtar_find(mtar_t *tar, const char *name, mtar_header_t *h) {
   int err;
   mtar_header_t header;
+
+  if (strlen(name) > MTAR_NAMEMAX)
+    return MTAR_ENAMELONG;
+
   /* Start at beginning */
   err = mtar_rewind(tar);
   if (err) {
@@ -371,6 +384,8 @@ int mtar_write_header(mtar_t *tar, const mtar_header_t *h) {
 
 int mtar_write_file_header(mtar_t *tar, const char *name, size_t size) {
   mtar_header_t h;
+  if (strlen(name) > MTAR_NAMEMAX)
+    return MTAR_ENAMELONG;
   /* Build header */
   memset(&h, 0, sizeof(h));
   strcpy(h.name, name);
@@ -383,6 +398,8 @@ int mtar_write_file_header(mtar_t *tar, const char *name, size_t size) {
 
 int mtar_write_dir_header(mtar_t *tar, const char *name) {
   mtar_header_t h;
+  if (strlen(name) > MTAR_NAMEMAX)
+    return MTAR_ENAMELONG;
   /* Build header */
   memset(&h, 0, sizeof(h));
   strcpy(h.name, name);
