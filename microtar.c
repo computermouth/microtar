@@ -209,6 +209,8 @@ static int file_close(mtar_t *tar) {
 int mtar_open_fp(mtar_t *tar, void *fp) {
   /* Init tar struct and functions */
   memset(tar, 0, sizeof(*tar));
+  if (!fp) return MTAR_EOPENFAIL;
+
   tar->write = file_write;
   tar->read = file_read;
   tar->seek = file_seek;
