@@ -2,7 +2,7 @@
 // Copyright (C) 2019 Katayama Hirofumi MZ <katayama.hirofumi.mz@gmail.com>
 // This file is public domain software.
 #ifndef MTAR_WRAP_HPP_
-#define MTAR_WRAP_HPP_      2   // Version 2
+#define MTAR_WRAP_HPP_      3   // Version 3
 
 #include "microtar.h"
 #include <cstring>
@@ -143,7 +143,7 @@ inline mtar_err_t mtar_wrap::read_header(mtar_header_t *h)
 {
     assert(is_open());
     mtar_err_t ret = mtar_read_header(&m_tar, h);
-    assert(ret == 0);
+    assert(ret == 0 || ret == MTAR_ENULLRECORD);
     return ret;
 }
 
