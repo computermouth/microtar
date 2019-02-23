@@ -2,7 +2,7 @@
 // Copyright (C) 2019 Katayama Hirofumi MZ <katayama.hirofumi.mz@gmail.com>
 // This file is public domain software.
 #ifndef MTAR_WRAP_HPP_
-#define MTAR_WRAP_HPP_      1   // Version 1
+#define MTAR_WRAP_HPP_      2   // Version 2
 
 #include "microtar.h"
 #include <cstring>
@@ -35,6 +35,9 @@ public:
     mtar_err_t write_dir_header(const char *name);
     mtar_err_t write_data(const void *data, size_t size);
     mtar_err_t finalize();
+
+    const void *memory() const;
+    size_t memory_size() const;
 
 protected:
     mtar_t m_tar;
@@ -190,6 +193,19 @@ inline mtar_err_t mtar_wrap::finalize()
     mtar_err_t ret = mtar_finalize(&m_tar);
     assert(ret == 0);
     return ret;
+}
+
+inline const void *mtar_wrap::memory() const
+{
+    if (m_tar.memory)
+        return m_tar.memory;
+    else
+        return m_tar.stream;
+}
+
+inline size_t mtar_wrap::memory_size() const
+{
+    return m_tar.memory_size;
 }
 
 #endif  // ndef MTAR_WRAP_HPP_
