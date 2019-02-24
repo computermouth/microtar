@@ -460,7 +460,7 @@ int mtar_finalize(mtar_t *tar) {
 
 static int memory_write(mtar_t *tar, const void *data, size_t size) {
   char *memory;
-  size_t request_size;
+  size_t request_size, new_capacity;
 
   if (tar->stream)
     return MTAR_EWRITEFAIL;
@@ -469,12 +469,20 @@ static int memory_write(mtar_t *tar, const void *data, size_t size) {
     return MTAR_ESUCCESS;
 
   request_size = tar->memory_pos + size;
-  if (request_size > tar->memory_size) {
-    memory = (char *)realloc(tar->memory, request_size);
+  if (request_size > tar->memory_capacity) {
+    if (request_size <= 1024)
+      new_capacity = 1024;
+    else
+      new_capacity = request_size * 2;
+    memory = (char *)realloc(tar->memory, new_capacity);
     if (!memory) {
       return MTAR_EWRITEFAIL;
     }
     tar->memory = memory;
+    tar->memory_size = request_size;
+    tar->memory_capacity = new_capacity;
+  } else if (request_size > tar->memory_size) {
+    memory = (char *)tar->memory;
     tar->memory_size = request_size;
   } else {
     memory = (char *)tar->memory;
@@ -538,6 +546,7 @@ int mtar_open_memory(mtar_t *tar, void *data, size_t size) {
   tar->memory = NULL;   /* for output */
   tar->memory_pos = 0;
   tar->memory_size = size;
+  tar->memory_capacity = 0;
 
   /* Return ok */
   return MTAR_ESUCCESS;

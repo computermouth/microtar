@@ -17,7 +17,7 @@ extern "C"
 #include <stdio.h>
 #include <stdlib.h>
 
-#define MTAR_VERSION "0.1.0khmz"
+#define MTAR_VERSION "0.1.2khmz"
 #define MTAR_NAMEMAX 99
 
 #if defined(_WIN64) || defined(__x86_64__) || defined(__ppc64__)
@@ -79,6 +79,7 @@ struct mtar_t {
   void *memory;         /* malloc'ed */
   size_t memory_pos;
   size_t memory_size;
+  size_t memory_capacity;
 };
 
 const char* mtar_strerror(int err);
