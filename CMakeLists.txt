@@ -10,7 +10,7 @@ cmake_minimum_required(VERSION 2.4)
 enable_testing()
 
 # project name and language
-project(microtar C CXX)
+project(microtar C CXX VERSION 0.1.3)
 
 # check build type
 if (NOT CMAKE_BUILD_TYPE)

@@ -17,7 +17,7 @@ extern "C"
 #include <stdio.h>
 #include <stdlib.h>
 
-#define MTAR_VERSION "0.1.2khmz"
+#define MTAR_VERSION "0.1.3"
 #define MTAR_NAMEMAX 99
 
 #if defined(_WIN64) || defined(__x86_64__) || defined(__ppc64__)
